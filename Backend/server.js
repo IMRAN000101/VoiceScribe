@@ -1,27 +1,9 @@
-const express = require("express");
-const cors = require("cors");
-const multer = require("multer");
+require("dotenv").config();
+const app = require("./src/app");
 
-const app = express();
+const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-
-app.get("/", (req, res) => {
-  res.send("Backend Running");
-});
-
-const upload = multer({ dest: "uploads/" });
-
-app.post("/api/transcribe", upload.single("audio"), (req, res) => {
-  console.log("File recieved.");
-  console.log(req.file);
-
-  res.json({
-    success: true,
-    message: "Audio Recieved",
-  });
-});
-
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+app.listen(PORT, () => {
+  console.log(`\n[SERVER] VoiceScribe AI Backend running on port ${PORT}`);
+  console.log(`[SERVER] Environment: ${process.env.NODE_ENV || "development"}\n`);
 });
