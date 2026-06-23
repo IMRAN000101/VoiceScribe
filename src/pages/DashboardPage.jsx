@@ -70,8 +70,16 @@ const SectionTitle = ({ eyebrow, title, description }) => (
 export default function DashboardPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
+  const [transcript, setTranscript] = useState("");
+  const [summary, setSummary] = useState("");
+  const [keyPoints, setKeyPoints] = useState("");
+  const [actionItems, setActionItems] = useState("");
+  const [translatedText, setTranslatedText] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+
   async function startRecording() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -89,6 +97,7 @@ export default function DashboardPage() {
       console.log("Microphone access denied:", error);
     }
   }
+
   async function stopRecording() {
     const mediaRecorder = mediaRecorderRef.current;
     if (!mediaRecorder) return;
@@ -111,12 +120,83 @@ export default function DashboardPage() {
         });
         const data = await response.json();
         console.log("Backend Response:", data);
+        setTranscript(data.transcript);
       } catch (error) {
         console.log("Update failed", error);
       }
     };
     setIsRecording(false);
   }
+
+  async function generateSummary() {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:5000/api/ai/summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript }),
+      });
+      const data = await response.json();
+      console.log(data);
+      setSummary(data.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function generateKeyPoints() {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:5000/api/ai/keypoints", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript }),
+      });
+      const data = await response.json();
+      console.log(data);
+      setKeyPoints(data.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function generateActionItems() {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:5000/api/ai/actionitems", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript }),
+      });
+      const data = await response.json();
+      console.log(data);
+      setActionItems(data.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function translateTranscipt() {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:5000/api/ai/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript, targetLanguage: "Hindi" }),
+      });
+      const data = await response.json();
+      console.log(data);
+      setTranslatedText(data.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <DashboardLayout>
       <div className="mx-auto max-w-[1480px] space-y-7 p-4 pb-10 sm:p-6 sm:pb-12 xl:p-8">
@@ -226,22 +306,18 @@ export default function DashboardPage() {
               </div>
               <div className="relative min-h-[175px] px-5 py-5 dark:text-slate-300 sm:px-6">
                 <div className="max-h-36 overflow-y-auto pr-3 text-[14px] leading-7 text-slate-700 selection:bg-indigo-100 dark:text-slate-300 dark:selection:bg-indigo-900">
-                  Hello everyone. Today we're going to discuss the project
-                  roadmap for our upcoming release. First, we'll focus on the
-                  frontend improvements and then move to backend integration.
-                  After that, we'll test the complete flow, resolve open issues,
-                  and prepare the application for production.
+                  <div>{transcript}</div>
                 </div>
                 <div className="absolute bottom-4 right-5 flex gap-2">
                   <button aria-label="Copy transcript" className="icon-button">
                     <Copy size={15} />
                   </button>
-                  <button
+                  {/* <button
                     aria-label="Download transcript"
                     className="icon-button"
                   >
                     <Download size={15} />
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </Card>
@@ -267,6 +343,20 @@ export default function DashboardPage() {
                   return (
                     <button
                       key={title}
+                      onClick={() => {
+                        if (title === "Generate Summary") {
+                          generateSummary();
+                        }
+                        if (title === "Extract Key Points") {
+                          generateKeyPoints();
+                        }
+                        if (title === "Extract Tasks") {
+                          generateActionItems();
+                        }
+                        if (title === "Translate") {
+                          translateTranscipt();
+                        }
+                      }}
                       className={`group min-h-40 rounded-2xl border bg-gradient-to-br p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:text-white ${t.tile}`}
                     >
                       <span
@@ -297,56 +387,55 @@ export default function DashboardPage() {
           <Result
             icon={Sparkles}
             title="AI Summary"
-            label="Generated just now"
+            label="Generated By AI"
             color="indigo"
           >
-            <p>
-              The team aligned on the upcoming release roadmap, prioritizing
-              frontend quality, backend integration, end-to-end testing, and a
-              confident production launch.
-            </p>
+            <ul className="space-y-3">
+              {summary
+                .split("*")
+                .filter((item) => item.trim())
+                .map((item, index) => (
+                  <li key={index} className="flex gap-2 text-sm leading-7">
+                    <span className="mt-2 h-2 w-2 rounded-full bg-indigo-500"></span>
+                    <span>{item.trim()}</span>
+                  </li>
+                ))}
+            </ul>
           </Result>
           <Result
             icon={ListIcon}
             title="Key Points"
-            label="4 insights found"
+            label="Generated By AI"
             color="blue"
           >
-            <ul className="space-y-2.5">
-              {[
-                "Improve the frontend experience",
-                "Complete API integration",
-                "Test the end-to-end flow",
-                "Prepare for production",
-              ].map((x) => (
-                <li className="flex gap-2.5" key={x}>
-                  <Check
-                    size={15}
-                    className="mt-1 shrink-0 text-blue-500 dark:text-blue-400"
-                  />
-                  {x}
-                </li>
-              ))}
+            <ul className="space-y-3">
+              {keyPoints
+                .split("*")
+                .filter((item) => item.trim())
+                .map((item, index) => (
+                  <li key={index} className="flex gap-2 text-sm leading-7">
+                    <Check size={15} className="mt-1 text-blue-500 shrink-0" />
+                    <span>{item.trim()}</span>
+                  </li>
+                ))}
             </ul>
           </Result>
           <Result
             icon={ListChecks}
             title="Action Items"
-            label="4 tasks identified"
+            label="Generated By AI"
             color="emerald"
           >
-            <ul className="space-y-2.5">
-              {[
-                "Polish frontend UI/UX",
-                "Connect backend APIs",
-                "Complete QA testing",
-                "Resolve launch issues",
-              ].map((x) => (
-                <li className="flex items-center gap-2.5" key={x}>
-                  <span className="h-4 w-4 rounded-md border border-slate-300 bg-slate-50 transition hover:border-emerald-400 dark:border-slate-600 dark:bg-slate-700 dark:hover:border-emerald-600" />
-                  {x}
-                </li>
-              ))}
+            <ul className="space-y-3">
+              {actionItems
+                .split("*")
+                .filter((item) => item.trim())
+                .map((item, index) => (
+                  <li key={index} className="flex gap-3 text-sm leading-7">
+                    <input type="checkbox" className="mt-1" />
+                    <span>{item.replace("[ ]", "").trim()}</span>
+                  </li>
+                ))}
             </ul>
           </Result>
         </section>

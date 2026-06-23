@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const transcriptionRoutes = require("./routes/transcriptionRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
 
@@ -14,7 +15,11 @@ app.get("/", (req, res) => {
   });
 });
 
+// Speech-to-text routes
 app.use("/api", transcriptionRoutes);
+
+// AI analysis routes
+app.use("/api", aiRoutes);
 
 app.use((err, req, res, next) => {
   console.error("[ERROR] Unhandled error:", err.message);

@@ -14,9 +14,13 @@ async function transcribe(req, res) {
     console.log("[UPLOAD] Processing file: " + req.file.filename);
 
     const transcript = await transcribeAudio(req.file.path);
-
+    
+    if (transcript && transcript.trim().length < 4) {
+      transcript = "";
+    }
+    
     await deleteFile(req.file.path);
-
+    
     return res.status(200).json({
       success: true,
       transcript: transcript,
