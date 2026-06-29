@@ -2,9 +2,18 @@ import { useState } from "react";
 import { Menu, Search, Bell, ChevronDown, Command } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import ThemeToggle from "../components/ThemeToggle";
+import { useAuth } from "../context/AuthContext";
 
 export default function DashboardLayout({ children }) {
   const [open, setOpen] = useState(false);
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#f6f7fb] dark:bg-slate-950">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_75%_0%,rgba(99,102,241,.07),transparent_30%),radial-gradient(circle_at_15%_80%,rgba(139,92,246,.04),transparent_30%)] dark:bg-[radial-gradient(circle_at_75%_0%,rgba(99,102,241,.15),transparent_30%),radial-gradient(circle_at_15%_80%,rgba(139,92,246,.1),transparent_30%)]" />
@@ -28,7 +37,7 @@ export default function DashboardLayout({ children }) {
             </button>
             <div>
               <p className="text-base font-bold tracking-[-.02em] text-slate-950 dark:text-white sm:text-lg">
-                Welcome back, Amaan{" "}
+                Welcome back, {user?.name}{" "}
                 <span className="inline-block origin-bottom-right animate-wave">
                   👋
                 </span>
@@ -60,10 +69,13 @@ export default function DashboardLayout({ children }) {
             <ThemeToggle />
             <button className="flex items-center gap-2 rounded-xl p-1.5 pr-2 hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm">
               <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-xs font-bold text-white shadow-md shadow-indigo-200 dark:shadow-indigo-900/30">
-                AK
+                {user?.name
+                  ?.split(" ")
+                  .map((word) => word[0])
+                  .join("")}
               </span>
               <span className="hidden text-left xl:block">
-                <b className="block text-xs dark:text-white">Amaan Khan</b>
+                <b className="block text-xs dark:text-white">{user?.name}</b>
                 <small className="block text-[10px] text-slate-400 dark:text-slate-500">
                   Free plan
                 </small>

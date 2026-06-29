@@ -11,6 +11,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Logo, Button } from "./ui";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const links = [
   ["Dashboard", LayoutDashboard, "/dashboard"],
@@ -21,6 +23,13 @@ const links = [
 ];
 
 export default function Sidebar({ open, onClose }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout();
+    navigate("/login");
+  }
   return (
     <aside
       className={`fixed inset-y-0 left-0 z-50 flex w-[272px] flex-col border-r border-slate-200/70 bg-white/95 px-4 py-5 shadow-2xl shadow-slate-200/30 backdrop-blur-xl transition-transform duration-300 dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-slate-950/50 lg:translate-x-0 lg:shadow-none ${open ? "translate-x-0" : "-translate-x-full"}`}
@@ -65,7 +74,9 @@ export default function Sidebar({ open, onClose }) {
             Pro
           </span>
         </div>
-        <p className="mt-3 text-sm font-bold dark:text-white">Unlock your potential</p>
+        <p className="mt-3 text-sm font-bold dark:text-white">
+          Unlock your potential
+        </p>
         <p className="mt-1 text-[11px] leading-5 text-slate-500 dark:text-slate-400">
           Unlimited recordings and smarter AI insights.
         </p>
@@ -76,16 +87,24 @@ export default function Sidebar({ open, onClose }) {
       <div className="mt-4 flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/70 p-2 dark:border-slate-700 dark:bg-slate-800/50">
         <div className="flex items-center gap-2">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-slate-900 text-[10px] font-bold text-white dark:bg-indigo-600">
-            AK
+            {user?.name
+              ?.split(" ")
+              .map((word) => word[0])
+              .join("")}
           </span>
           <div>
-            <p className="text-[11px] font-bold dark:text-white">Amaan Khan</p>
-            <p className="text-[9px] text-slate-400 dark:text-slate-500">Free workspace</p>
+            <p className="text-[11px] font-bold dark:text-white">
+              {user?.name}
+            </p>
+            <p className="text-[9px] text-slate-400 dark:text-slate-500">
+              Free workspace
+            </p>
           </div>
         </div>
         <button
+          onClick={handleLogout}
           aria-label="Log out"
-          className="p-2 text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
+          className="p-2 text-slate-400 transition-colors duration-200 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
         >
           <LogOut size={15} />
         </button>

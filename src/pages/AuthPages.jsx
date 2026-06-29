@@ -1,7 +1,19 @@
-import { Link } from "react-router-dom";
+import { login as loginUser, signup as signupUser } from "../api/authApi";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Mail, Lock, UserRound } from "lucide-react";
 import { Logo, Button, Card } from "../components/ui";
-function Field({ label, type = "text", icon: Icon, placeholder }) {
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+
+function Field({
+  label,
+  type = "text",
+  icon: Icon,
+  placeholder,
+  name,
+  value,
+  onChange,
+}) {
   return (
     <label className="block">
       <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">
@@ -12,13 +24,47 @@ function Field({ label, type = "text", icon: Icon, placeholder }) {
         <input
           type={type}
           placeholder={placeholder}
+          name={name}
+          value={value}
+          onChange={onChange}
           className="w-full bg-transparent text-sm outline-none dark:text-white dark:placeholder-slate-500"
         />
       </span>
     </label>
   );
 }
+
 function Auth({ signup = false }) {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const { loadUser } = useAuth();
+  const navigate = useNavigate();
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (signup) {
+        await signupUser(formData);
+        navigate("/login");
+      } else {
+        const data = await loginUser(formData);
+        localStorage.setItem("token", data.token);
+        await loadUser();
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <section className="relative hidden overflow-hidden bg-slate-950 p-12 text-white lg:flex lg:flex-col">
@@ -62,38 +108,44 @@ function Auth({ signup = false }) {
                 ? "Start turning speech into insight today."
                 : "Sign in to continue to VoiceScribe AI."}
             </p>
-            <form
-              className="mt-7 space-y-4"
-              onSubmit={(e) => e.preventDefault()}
-            >
+            <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
               {signup && (
                 <Field
                   label="Full Name"
+                  name="name"
                   icon={UserRound}
-                  placeholder="MD Imran"
+                  placeholder="Your Name"
+                  value={formData.name}
+                  onChange={handleChange}
                 />
               )}
               <Field
                 label="Email"
-                type="email"
+                name="email"
                 icon={Mail}
                 placeholder="you@example.com"
+                value={formData.email}
+                onChange={handleChange}
               />
               <Field
                 label="Password"
-                type="password"
+                name="password"
                 icon={Lock}
                 placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
               />
               {signup && (
                 <Field
                   label="Confirm Password"
-                  type="password"
+                  name="confirmPassword"
                   icon={Lock}
                   placeholder="••••••••"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
                 />
               )}
-              <Button className="mt-2 w-full py-3">
+              <Button type="submit" className="mt-2 w-full py-3">
                 {signup ? "Create Account" : "Log in"}
               </Button>
             </form>

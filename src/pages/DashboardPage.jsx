@@ -1,3 +1,4 @@
+import { getProfile } from "../api/userApi";
 import {
   Mic2,
   Square,
@@ -19,7 +20,8 @@ import {
 import DashboardLayout from "../layouts/DashboardLayout";
 import { Button, Card } from "../components/ui";
 import { actions, recordings } from "../data/mockData";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const waveHeights = [
   10, 18, 31, 21, 42, 28, 16, 35, 46, 25, 16, 39, 30, 14, 24, 38, 19, 29, 12,
@@ -81,6 +83,9 @@ export default function DashboardPage() {
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+
+  const { user } = useAuth();
+  console.log(user);
 
   async function startRecording() {
     try {
@@ -198,6 +203,7 @@ export default function DashboardPage() {
       setLoading(false);
     }
   }
+
 
   return (
     <DashboardLayout>
@@ -469,7 +475,6 @@ export default function DashboardPage() {
                 .filter((item) => item.trim())
                 .map((item, index) => (
                   <li key={index} className="flex gap-3 text-sm leading-7">
-                    <input type="checkbox" className="mt-1" />
                     <span>{item.replace("[ ]", "").trim()}</span>
                   </li>
                 ))}
