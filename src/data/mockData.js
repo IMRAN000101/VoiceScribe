@@ -47,8 +47,3 @@ export const actions = [
     tone: "amber",
   },
 ];
-export const recordings = [
-  ["Project Roadmap Meeting", "Jun 18, 2026", "25:43"],
-  ["Product Design Review", "Jun 16, 2026", "48:12"],
-  ["Machine Learning Lecture", "Jun 12, 2026", "34:08"],
-];

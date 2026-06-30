@@ -5,6 +5,7 @@ const transcriptionRoutes = require("./routes/transcriptionRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
+const recordingRoutes = require("./routes/recordingRoutes");
 
 const app = express();
 
@@ -23,6 +24,9 @@ app.use("/api", transcriptionRoutes);
 
 // AI analysis routes
 app.use("/api", aiRoutes);
+
+//Recording Routes
+app.use("/api", recordingRoutes);
 
 // Authentication routes
 app.use("/api/auth", authRoutes);

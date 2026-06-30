@@ -6,22 +6,31 @@ import {
   Download,
   ArrowUpRight,
   Play,
-  Clock3,
+  // Clock3,
   Languages,
   Sparkles,
   ListChecks,
   Menu as ListIcon,
-  MoreHorizontal,
+  // MoreHorizontal,
   ChevronRight,
   Check,
   WandSparkles,
   Radio,
+  Trash2,
 } from "lucide-react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { Button, Card } from "../components/ui";
-import { actions, recordings } from "../data/mockData";
+import { actions } from "../data/mockData";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import toast, { Toaster } from "react-hot-toast";
+import {
+  getRecordings,
+  saveRecording,
+  getRecording,
+  deleteRecording,
+  updateRecording,
+} from "../api/recordingApi";
 
 const waveHeights = [
   10, 18, 31, 21, 42, 28, 16, 35, 46, 25, 16, 39, 30, 14, 24, 38, 19, 29, 12,
@@ -80,12 +89,23 @@ export default function DashboardPage() {
   const [translatedText, setTranslatedText] = useState("");
   const [language, setLanguage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [recordings, setRecordings] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editedTitle, setEditedTitle] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [recordingToDelete, setRecordingToDelete] = useState(null);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
   const { user } = useAuth();
-  console.log(user);
+  useEffect(() => {
+    console.log(user);
+  }, [user]);
+
+  useEffect(() => {
+    loadRecordings();
+  }, []);
 
   async function startRecording() {
     try {
@@ -204,6 +224,89 @@ export default function DashboardPage() {
     }
   }
 
+  async function handleSaveRecording() {
+    try {
+      const recordingData = {
+        title: `Meeting ${new Date().toLocaleString()}`,
+        transcript,
+        summary,
+        keyPoints: keyPoints
+          .split("*")
+          .filter((item) => item.trim())
+          .map((item) => item.replace("[ ]", "").trim()),
+        actionItems: actionItems
+          .split("*")
+          .filter((item) => item.trim())
+          .map((item) => item.replace("[ ]", "").trim()),
+        translatedText,
+        audioUrl: audioURL,
+      };
+      const { data } = await saveRecording(recordingData);
+      console.log(data);
+      toast.success("Recording Saved");
+      await loadRecordings();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to Save Recording");
+    }
+  }
+
+  async function loadRecordings() {
+    try {
+      const { data } = await getRecordings();
+      setRecordings(data.recordings);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function handleOpenRecording(id) {
+    try {
+      const { data } = await getRecording(id);
+      const recording = data.recording;
+      setTranscript(recording.transcript);
+      setSummary(recording.summary || "");
+      setKeyPoints((recording.keyPoints || []).join("*"));
+      setActionItems((recording.actionItems || []).join("*"));
+      setTranslatedText(recording.translatedText || "");
+      // setAudioURL(recording.audioUrl || null);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function handleDeleteRecording(id) {
+    try {
+      await deleteRecording(id);
+      await loadRecordings();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function handleUpdatedTitle(id) {
+    try {
+      await updateRecording(id, {
+        title: editedTitle,
+      });
+      setEditingId(null);
+      setEditedTitle("");
+      await loadRecordings();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function confirmDelete() {
+    try {
+      await handleDeleteRecording(recordingToDelete);
+
+      setShowDeleteModal(false);
+      setRecordingToDelete(null);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <DashboardLayout>
@@ -276,7 +379,7 @@ export default function DashboardPage() {
               </Button>
             </div>
             {
-              /*isRecording && */ <div className="mt-5 flex h-14 items-center justify-center gap-[3px] overflow-hidden rounded-xl border border-indigo-100/60 bg-white/70 px-3 dark:border-indigo-900/40 dark:bg-slate-800/50">
+              /* isRecording && */ <div className="mt-5 flex h-14 items-center justify-center gap-[3px] overflow-hidden rounded-xl border border-indigo-100/60 bg-white/70 px-3 dark:border-indigo-900/40 dark:bg-slate-800/50">
                 {waveHeights.map((h, i) => (
                   <span
                     key={i}
@@ -482,6 +585,10 @@ export default function DashboardPage() {
           </Result>
         </section>
 
+        <div className="flex justify-end">
+          <Button onClick={handleSaveRecording}>Save Recording</Button>
+        </div>
+
         <Card
           id="history"
           className="animate-rise overflow-hidden border-white/80 shadow-premium dark:border-slate-700"
@@ -504,45 +611,147 @@ export default function DashboardPage() {
             </button>
           </div>
           <div className="divide-y divide-slate-100 dark:divide-slate-700">
-            {recordings.map(([title, date, duration], i) => (
-              <div
-                key={title}
-                className="group grid items-center gap-3 px-5 py-4 transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50 sm:grid-cols-[1.5fr_1fr_.5fr_auto] sm:px-6"
-              >
-                <div className="flex min-w-0 items-center gap-3.5">
-                  <button
-                    aria-label={`Play ${title}`}
-                    className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600 transition-all group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-md dark:bg-indigo-950/40 dark:text-indigo-400 dark:group-hover:bg-indigo-600"
+            {recordings.length === 0 ? (
+              <div className="py-16 text-center">
+                <Mic2 size={42} className="mx-auto text-slate-400" />
+
+                <p className="mt-4 text-lg font-semibold">No recordings yet</p>
+
+                <p className="text-sm text-slate-500">
+                  Record your first meeting to see it here.
+                </p>
+              </div>
+            ) : (
+              recordings.map((recording) => (
+                <div
+                  key={recording._id}
+                  className="group grid items-center gap-3 px-5 py-4 transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50 sm:grid-cols-[2fr_1fr_auto] sm:px-6"
+                >
+                  <div
+                    onClick={() => handleOpenRecording(recording._id)}
+                    className="flex min-w-0 items-center gap-3.5 cursor-pointer"
                   >
-                    <Play size={13} fill="currentColor" />
-                  </button>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-800 dark:text-white">
-                      {title}
-                    </p>
-                    <p className="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500 sm:hidden">
-                      {date} · {duration}
-                    </p>
+                    <button
+                      aria-label={`Play ${recording.title}`}
+                      className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600 transition-all group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-md dark:bg-indigo-950/40 dark:text-indigo-400 dark:group-hover:bg-indigo-600"
+                    >
+                      <Play size={13} fill="currentColor" />
+                    </button>
+                    <div className="min-w-0">
+                      {editingId === recording._id ? (
+                        <div className="mt-2 flex items-center gap-2">
+                          <input
+                            value={editedTitle}
+                            onChange={(e) => setEditedTitle(e.target.value)}
+                            autoFocus
+                            className="w-full rounded-lg border flex-1  border-slate-300 bg-transparent px-3 py-1 text-sm outline-none focus:border-indigo-500 dark:border-slate-600 dark:bg-slate-800"
+                          />
+                        </div>
+                      ) : (
+                        <p className="truncate text-sm font-semibold text-slate-800 dark:text-white">
+                          {recording.title}
+                        </p>
+                      )}
+                      <p className="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500 sm:hidden">
+                        {new Date(recording.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="hidden text-xs text-slate-500 dark:text-slate-400 sm:block">
+                    {new Date(recording.createdAt).toLocaleDateString()}
+                  </span>
+                  {/* <span className="hidden items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 sm:flex">
+                    <Clock3 size={13} />
+                  </span> */}
+                  <div className="ml-auto flex items-center gap-2">
+                    {editingId === recording._id ? (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleUpdatedTitle(recording._id)}
+                        >
+                          Save
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditedTitle("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditingId(recording._id);
+                            setEditedTitle(recording.title);
+                          }}
+                          className="rounded-md px-3 py-1 text-sm font-medium text-indigo-400 hover:bg-indigo-500/10 transition"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setRecordingToDelete(recording._id);
+                            setShowDeleteModal(true);
+                          }}
+                          className="rounded-md px-3 py-1 text-sm font-medium text-red-400 hover:bg-red-500/10 transition"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
-                <span className="hidden text-xs text-slate-500 dark:text-slate-400 sm:block">
-                  {date}
-                </span>
-                <span className="hidden items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 sm:flex">
-                  <Clock3 size={13} />
-                  {duration}
-                </span>
-                <button
-                  aria-label={`More options for ${title}`}
-                  className="icon-button ml-auto"
-                >
-                  <MoreHorizontal size={16} />
-                </button>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </Card>
       </div>
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
+                <Trash2 size={24} className="text-red-500" />
+              </div>
+
+              <div>
+                <h2 className="text-lg font-bold text-white">
+                  Delete Recording?
+                </h2>
+              </div>
+            </div>
+
+            <p className="mt-5 text-sm leading-6 text-slate-400">
+              Are you sure you want to permanently delete this recording? This
+              action cannot be undone.
+            </p>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setRecordingToDelete(null);
+                }}
+              >
+                Cancel
+              </Button>
+
+              <Button variant="danger" onClick={confirmDelete}>
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }
