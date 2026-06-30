@@ -3,5 +3,4 @@ node_modules/
 uploads/
 dist/
 *.log
-dist/
 .DS_Store
