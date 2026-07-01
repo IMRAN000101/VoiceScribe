@@ -27,7 +27,6 @@ import RecordingCard from "../components/dashboard/RecordingCard";
 import DeleteModal from "../components/dashboard/DeleteModal";
 import ResultCard from "../components/dashboard/ResultCard";
 
-
 const SectionTitle = ({ eyebrow, title, description }) => (
   <div>
     <p className="text-[11px] font-bold uppercase tracking-[.16em] text-indigo-500 dark:text-indigo-400">
@@ -312,23 +311,11 @@ export default function DashboardPage() {
     toast.success(`${label} copied`);
   }
 
-  const filteredAndSortedRecordings = [...recordings]
-    .filter(
-      (recording) =>
-        recording.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recording.transcript.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "oldest":
-          return new Date(a.createdAt) - new Date(b.createdAt);
-        case "alphabetical":
-          return a.title.localeCompare(b.title);
-        case "newest":
-        default:
-          return new Date(b.createdAt) - new Date(a.createdAt);
-      }
-    });
+  const filteredAndSortedRecordings = [...recordings].filter(
+    (recording) =>
+      recording.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      recording.transcript.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   return (
     <DashboardLayout searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
