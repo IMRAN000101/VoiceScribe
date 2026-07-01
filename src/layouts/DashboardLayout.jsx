@@ -4,7 +4,11 @@ import Sidebar from "../components/Sidebar";
 import ThemeToggle from "../components/ThemeToggle";
 import { useAuth } from "../context/AuthContext";
 
-export default function DashboardLayout({ children }) {
+export default function DashboardLayout({
+  children,
+  searchTerm = "",
+  setSearchTerm,
+}) {
   const [open, setOpen] = useState(false);
   const { user, loading } = useAuth();
   if (loading) {
@@ -49,19 +53,23 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <label className="hidden h-10 items-center gap-2.5 rounded-xl border border-slate-200/80 bg-white px-3 shadow-sm transition focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-50 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:border-indigo-600 dark:focus-within:ring-indigo-950 md:flex">
-              <Search
-                size={16}
-                className="text-slate-400 dark:text-slate-500"
-              />
-              <input
-                className="w-40 bg-transparent text-xs outline-none dark:text-white dark:placeholder-slate-500 xl:w-52"
-                placeholder="Search recordings..."
-              />
-              <span className="flex items-center gap-0.5 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-1 text-[9px] font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500">
-                <Command size={9} />K
-              </span>
-            </label>
+            {setSearchTerm && (
+              <label className="hidden h-10 items-center gap-2.5 rounded-xl border border-slate-200/80 bg-white px-3 shadow-sm transition focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-50 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:border-indigo-600 dark:focus-within:ring-indigo-950 md:flex">
+                <Search
+                  size={16}
+                  className="text-slate-400 dark:text-slate-500"
+                />
+                <input
+                  className="w-40 bg-transparent text-xs outline-none dark:text-white dark:placeholder-slate-500 xl:w-52"
+                  placeholder="Search recordings..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <span className="flex items-center gap-0.5 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-1 text-[9px] font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500">
+                  <Command size={9} />K
+                </span>
+              </label>
+            )}
             <button aria-label="Notifications" className="icon-button relative">
               <Bell size={18} />
               <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-indigo-500 ring-2 ring-white dark:ring-slate-900" />

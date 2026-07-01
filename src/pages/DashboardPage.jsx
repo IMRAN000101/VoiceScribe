@@ -1,6 +1,7 @@
 import { getProfile } from "../api/userApi";
 import {
   Mic2,
+  Search,
   Square,
   Copy,
   Download,
@@ -94,6 +95,8 @@ export default function DashboardPage() {
   const [editedTitle, setEditedTitle] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recordingToDelete, setRecordingToDelete] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -308,8 +311,26 @@ export default function DashboardPage() {
     }
   }
 
+  const filteredAndSortedRecordings = [...recordings]
+    .filter(
+      (recording) =>
+        recording.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        recording.transcript.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "oldest":
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        case "alphabetical":
+          return a.title.localeCompare(b.title);
+        case "newest":
+        default:
+          return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+    });
+
   return (
-    <DashboardLayout>
+    <DashboardLayout searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
       <div className="mx-auto max-w-[1480px] space-y-7 p-4 pb-10 sm:p-6 sm:pb-12 xl:p-8">
         <div className="animate-rise flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <SectionTitle
@@ -610,6 +631,7 @@ export default function DashboardPage() {
               />
             </button>
           </div>
+
           <div className="divide-y divide-slate-100 dark:divide-slate-700">
             {recordings.length === 0 ? (
               <div className="py-16 text-center">
@@ -621,8 +643,20 @@ export default function DashboardPage() {
                   Record your first meeting to see it here.
                 </p>
               </div>
+            ) : filteredAndSortedRecordings.length === 0 ? (
+              <div className="py-16 text-center">
+                <Search size={42} className="mx-auto text-slate-400" />
+
+                <p className="mt-4 text-lg font-semibold">
+                  No matching recordings
+                </p>
+
+                <p className="text-sm text-slate-500">
+                  Try searching with a different keyword.
+                </p>
+              </div>
             ) : (
-              recordings.map((recording) => (
+              filteredAndSortedRecordings.map((recording) => (
                 <div
                   key={recording._id}
                   className="group grid items-center gap-3 px-5 py-4 transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50 sm:grid-cols-[2fr_1fr_auto] sm:px-6"
@@ -637,6 +671,7 @@ export default function DashboardPage() {
                     >
                       <Play size={13} fill="currentColor" />
                     </button>
+
                     <div className="min-w-0">
                       {editingId === recording._id ? (
                         <div className="mt-2 flex items-center gap-2">
@@ -644,7 +679,7 @@ export default function DashboardPage() {
                             value={editedTitle}
                             onChange={(e) => setEditedTitle(e.target.value)}
                             autoFocus
-                            className="w-full rounded-lg border flex-1  border-slate-300 bg-transparent px-3 py-1 text-sm outline-none focus:border-indigo-500 dark:border-slate-600 dark:bg-slate-800"
+                            className="w-full rounded-lg border flex-1 border-slate-300 bg-transparent px-3 py-1 text-sm outline-none focus:border-indigo-500 dark:border-slate-600 dark:bg-slate-800"
                           />
                         </div>
                       ) : (
@@ -652,17 +687,17 @@ export default function DashboardPage() {
                           {recording.title}
                         </p>
                       )}
+
                       <p className="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500 sm:hidden">
                         {new Date(recording.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
+
                   <span className="hidden text-xs text-slate-500 dark:text-slate-400 sm:block">
                     {new Date(recording.createdAt).toLocaleDateString()}
                   </span>
-                  {/* <span className="hidden items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 sm:flex">
-                    <Clock3 size={13} />
-                  </span> */}
+
                   <div className="ml-auto flex items-center gap-2">
                     {editingId === recording._id ? (
                       <>
