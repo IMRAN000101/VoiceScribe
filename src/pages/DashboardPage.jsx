@@ -89,7 +89,6 @@ export default function DashboardPage() {
   const [actionItems, setActionItems] = useState("");
   const [translatedText, setTranslatedText] = useState("");
   const [language, setLanguage] = useState("");
-  const [loading, setLoading] = useState(false);
   const [recordings, setRecordings] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editedTitle, setEditedTitle] = useState("");
@@ -97,6 +96,12 @@ export default function DashboardPage() {
   const [recordingToDelete, setRecordingToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const [loadingActions, setLoadingActions] = useState({
+    summary: false,
+    keypoints: false,
+    actionitems: false,
+    translate: false,
+  });
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -160,7 +165,10 @@ export default function DashboardPage() {
 
   async function generateSummary() {
     try {
-      setLoading(true);
+      setLoadingActions((prev) => ({
+        ...prev,
+        summary: true,
+      }));
       const response = await fetch("http://localhost:5000/api/ai/summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -172,12 +180,18 @@ export default function DashboardPage() {
     } catch (error) {
       console.log(error);
     } finally {
-      setLoading(false);
+      setLoadingActions(prev=>({
+        ...prev,
+        summary:false,
+      }));
     }
   }
   async function generateKeyPoints() {
     try {
-      setLoading(true);
+      setLoadingActions((prev) => ({
+        ...prev,
+        keypoints: true,
+      }));
       const response = await fetch("http://localhost:5000/api/ai/keypoints", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -189,12 +203,18 @@ export default function DashboardPage() {
     } catch (error) {
       console.log(error);
     } finally {
-      setLoading(false);
+      setLoadingActions(prev=>({
+        ...prev,
+        keypoints:false,
+      }));
     }
   }
   async function generateActionItems() {
     try {
-      setLoading(true);
+      setLoadingActions((prev) => ({
+        ...prev,
+        actionitems: true,
+      }));
       const response = await fetch("http://localhost:5000/api/ai/actionitems", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -206,12 +226,18 @@ export default function DashboardPage() {
     } catch (error) {
       console.log(error);
     } finally {
-      setLoading(false);
+      setLoadingActions((prev) => ({
+        ...prev,
+        actionitems: false,
+      }));
     }
   }
   async function translateTranscript() {
     try {
-      setLoading(true);
+      setLoadingActions((prev) => ({
+        ...prev,
+        translate: true,
+      }));
       const response = await fetch("http://localhost:5000/api/ai/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -223,7 +249,10 @@ export default function DashboardPage() {
     } catch (error) {
       console.log(error);
     } finally {
-      setLoading(false);
+      setLoadingActions((prev) => ({
+        ...prev,
+        translate: false,
+      }));
     }
   }
 
@@ -438,7 +467,16 @@ export default function DashboardPage() {
               </div>
               <div className="relative min-h-[175px] px-5 py-5 dark:text-slate-300 sm:px-6">
                 <div className="max-h-36 overflow-y-auto pr-3 text-[14px] leading-7 text-slate-700 selection:bg-indigo-100 dark:text-slate-300 dark:selection:bg-indigo-900">
-                  <div>{transcript}</div>
+                  <div>
+                    {transcript.trim() ? (
+                      transcript
+                    ) : (
+                      <p className="text-sm leading-6 text-slate-400 dark:text-slate-500">
+                        Start recording to begin live transcription. Your
+                        transcript will appear here.
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="absolute bottom-4 right-5 flex gap-2">
                   <button aria-label="Copy transcript" className="icon-button">
@@ -491,7 +529,16 @@ export default function DashboardPage() {
                   return (
                     <button
                       key={title}
-                      disabled={title === "Translate" && !language}
+                      disabled={
+                        (title === "Translate" && !language) ||
+                        (title === "Generate Summary" &&
+                          loadingActions.summary) ||
+                        (title === "Extract Key Points" &&
+                          loadingActions.keypoints) ||
+                        (title === "Extract Tasks" &&
+                          loadingActions.actionitems) ||
+                        (title === "Translate" && loadingActions.translate)
+                      }
                       onClick={() => {
                         if (title === "Generate Summary") {
                           generateSummary();
@@ -506,7 +553,7 @@ export default function DashboardPage() {
                           translateTranscript();
                         }
                       }}
-                      className={`group min-h-40 rounded-2xl border bg-gradient-to-br p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:text-white ${t.tile}`}
+                      className={`group min-h-40 rounded-2xl border bg-gradient-to-br p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:text-white disabled:opacity-60 disabled:cursor-not-allowed ${t.tile}`}
                     >
                       <span
                         className={`grid h-9 w-9 place-items-center rounded-xl shadow-lg ${t.icon}`}
@@ -514,7 +561,18 @@ export default function DashboardPage() {
                         <Icon size={17} />
                       </span>
                       <h3 className="mt-4 text-[13px] font-bold text-slate-900 dark:text-white">
-                        {title}
+                        {loadingActions.summary && title === "Generate Summary"
+                          ? "Generating..."
+                          : loadingActions.keypoints &&
+                              title === "Extract Key Points"
+                            ? "Generating..."
+                            : loadingActions.actionitems &&
+                                title === "Extract Tasks"
+                              ? "Generating..."
+                              : loadingActions.translate &&
+                                  title === "Translate"
+                                ? "Translating..."
+                                : title}
                       </h3>
                       <p className="mt-1 text-[11px] leading-4 text-slate-500 dark:text-slate-400">
                         {text}
@@ -538,6 +596,8 @@ export default function DashboardPage() {
             title="AI Summary"
             label="Generated By AI"
             color="indigo"
+            isEmpty={!summary.trim()}
+            emptyMessage="Generate a summary to see a concise overview of your conversation."
           >
             <ul className="space-y-3">
               {summary
@@ -556,6 +616,8 @@ export default function DashboardPage() {
             title="Key Points"
             label="Generated By AI"
             color="blue"
+            isEmpty={!keyPoints.trim()}
+            emptyMessage="Key discussion points will appear here after AI analysis."
           >
             <ul className="space-y-3">
               {keyPoints
@@ -574,6 +636,8 @@ export default function DashboardPage() {
             title="Action Items"
             label="Generated By AI"
             color="emerald"
+            isEmpty={!actionItems.trim()}
+            emptyMessage="Generate action items to extract tasks and follow-ups automatically."
           >
             <ul className="space-y-3">
               {actionItems
@@ -592,6 +656,8 @@ export default function DashboardPage() {
             title="Translate"
             label="Generated By AI"
             color="amber"
+            isEmpty={!translatedText.trim()}
+            emptyMessage="Choose a language and generate a translated version of your transcript."
           >
             <ul className="space-y-3">
               {translatedText
@@ -791,7 +857,15 @@ export default function DashboardPage() {
   );
 }
 
-function Result({ icon: Icon, title, label, color, children }) {
+function Result({
+  icon: Icon,
+  title,
+  label,
+  color,
+  children,
+  isEmpty,
+  emptyMessage,
+}) {
   const variants = {
     indigo:
       "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400",
@@ -821,8 +895,18 @@ function Result({ icon: Icon, title, label, color, children }) {
           <Copy size={14} />
         </button>
       </div>
-      <div className="mt-5 text-[13px] leading-6 text-slate-600 dark:text-slate-400">
-        {children}
+      <div className="mt-5 min-h-[140px]">
+        {isEmpty ? (
+          <div className="flex min-h-[140px] items-center justify-center rounded-xl bg-slate-50/40 px-5 text-center dark:bg-slate-800/20">
+            <p className="text-sm leading-6 text-slate-400 dark:text-slate-500">
+              {emptyMessage}
+            </p>
+          </div>
+        ) : (
+          <div className="text-[13px] leading-6 text-slate-600 dark:text-slate-400">
+            {children}
+          </div>
+        )}
       </div>
     </Card>
   );
