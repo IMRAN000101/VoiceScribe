@@ -10,19 +10,13 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import { Button } from "../components/ui";
 import { useState, useRef, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import {
-  getRecordings,
-  saveRecording,
-  getRecording,
-  deleteRecording,
-  updateRecording,
-} from "../api/recordingApi";
+import { saveRecording, getRecording } from "../api/recordingApi";
+import { useAuth } from "../context/AuthContext";
 import RecordingCard from "../components/dashboard/RecordingCard";
+import ResultCard from "../components/dashboard/ResultCard";
 import TranscriptCard from "../components/dashboard/TranscriptCard";
 import AIActions from "../components/dashboard/AIActions";
-import ResultCard from "../components/dashboard/ResultCard";
-import RecentRecordings from "../components/dashboard/RecentRecordings";
-import DeleteModal from "../components/dashboard/DeleteModal";
+
 import {
   generateSummary as generateSummaryApi,
   generateKeyPoints as generateKeyPointsApi,
@@ -32,6 +26,8 @@ import {
   generateMeetingTitle as generateMeetingTitleApi,
   generateSentimentAnalysis as generateSentimentAnalysisApi,
 } from "../api/aiApi";
+
+import { useParams } from "react-router-dom";
 
 const SectionTitle = ({ eyebrow, title, description }) => (
   <div>
@@ -49,7 +45,7 @@ const SectionTitle = ({ eyebrow, title, description }) => (
   </div>
 );
 
-export default function DashboardPage() {
+export default function NewRecordingPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
   const [transcript, setTranscript] = useState("");
@@ -61,12 +57,7 @@ export default function DashboardPage() {
   const [emotionAnalysis, setEmotionAnalysis] = useState(null);
   const [sentimentAnalysis, setSentimentAnalysis] = useState(null);
   const [meetingTitle, setMeetingTitle] = useState("");
-  const [recordings, setRecordings] = useState([]);
-  const [editingId, setEditingId] = useState(null);
-  const [editedTitle, setEditedTitle] = useState("");
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [recordingToDelete, setRecordingToDelete] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
+
   const [loadingActions, setLoadingActions] = useState({
     summary: false,
     keypoints: false,
@@ -80,14 +71,17 @@ export default function DashboardPage() {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
-  // const { user } = useAuth();
-  // useEffect(() => {
-  //   console.log(user);
-  // }, [user]);
-
+  const { user } = useAuth();
   useEffect(() => {
-    loadRecordings();
-  }, []);
+    console.log(user);
+  }, [user]);
+
+  const { id } = useParams();
+  useEffect(() => {
+    if (id) {
+      handleOpenRecording(id);
+    }
+  }, [id]);
 
   async function startRecording() {
     try {
@@ -300,15 +294,6 @@ export default function DashboardPage() {
     }
   }
 
-  async function loadRecordings() {
-    try {
-      const { data } = await getRecordings();
-      setRecordings(data.recordings);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
   async function handleOpenRecording(id) {
     try {
       const { data } = await getRecording(id);
@@ -324,39 +309,6 @@ export default function DashboardPage() {
       setSentimentAnalysis(recording.sentimentAnalysis || null);
     } catch (error) {
       console.log(error);
-    }
-  }
-
-  async function handleDeleteRecording(id) {
-    try {
-      await deleteRecording(id);
-      await loadRecordings();
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function handleUpdatedTitle(id) {
-    try {
-      await updateRecording(id, {
-        title: editedTitle,
-      });
-      setEditingId(null);
-      setEditedTitle("");
-      await loadRecordings();
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function confirmDelete() {
-    try {
-      await handleDeleteRecording(recordingToDelete);
-
-      setShowDeleteModal(false);
-      setRecordingToDelete(null);
-    } catch (error) {
-      console.error(error);
     }
   }
 
@@ -384,14 +336,8 @@ ${emotion.emotions.map((e) => `${e.name}: ${e.percentage}%`).join("\n")}
 `.trim();
   }
 
-  const filteredAndSortedRecordings = [...recordings].filter(
-    (recording) =>
-      recording.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      recording.transcript.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
   return (
-    <DashboardLayout searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
+    <DashboardLayout>
       <div className="mx-auto max-w-[1480px] space-y-7 p-4 pb-10 sm:p-6 sm:pb-12 xl:p-8">
         <div className="animate-rise flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <SectionTitle
@@ -608,26 +554,7 @@ ${emotion.emotions.map((e) => `${e.name}: ${e.percentage}%`).join("\n")}
         <div className="flex justify-end">
           <Button onClick={handleSaveRecording}>Save Recording</Button>
         </div>
-
-        <RecentRecordings
-          recordings={recordings}
-          filteredAndSortedRecordings={filteredAndSortedRecordings}
-          editingId={editingId}
-          editedTitle={editedTitle}
-          setEditingId={setEditingId}
-          setEditedTitle={setEditedTitle}
-          handleUpdatedTitle={handleUpdatedTitle}
-          handleOpenRecording={handleOpenRecording}
-          setRecordingToDelete={setRecordingToDelete}
-          setShowDeleteModal={setShowDeleteModal}
-        />
       </div>
-      <DeleteModal
-        showDeleteModal={showDeleteModal}
-        setShowDeleteModal={setShowDeleteModal}
-        setRecordingToDelete={setRecordingToDelete}
-        confirmDelete={confirmDelete}
-      />
     </DashboardLayout>
   );
 }

@@ -5,6 +5,8 @@ import {
   Languages,
   WandSparkles,
   ArrowUpRight,
+  Brain,
+  Smile,
 } from "lucide-react";
 
 import { Card } from "../ui";
@@ -17,6 +19,8 @@ const AIActions = ({
   generateKeyPoints,
   generateActionItems,
   translateTranscript,
+  generateEmotionAnalysis,
+  generateSentimentAnalysis,
 }) => {
   const actions = [
     {
@@ -42,6 +46,18 @@ const AIActions = ({
       title: "Translate",
       text: "Translate into 30+ languages",
       tone: "amber",
+    },
+    {
+      icon: Brain,
+      title: "Emotion Analysis",
+      text: "Detect meeting emotions",
+      tone: "rose",
+    },
+    {
+      icon: Smile,
+      title: "Sentiment Analysis",
+      text: "Understand conversation tone",
+      tone: "violet",
     },
   ];
 
@@ -69,6 +85,18 @@ const AIActions = ({
       icon: "bg-amber-500 text-white shadow-amber-200 dark:shadow-amber-900/50",
       button:
         "text-amber-600 group-hover:bg-amber-500 dark:text-amber-400 dark:group-hover:bg-amber-500",
+    },
+    rose: {
+      tile: "from-rose-50 to-pink-50/60 border-rose-100/80 dark:from-rose-950/40 dark:to-pink-950/40 dark:border-rose-900/60",
+      icon: "bg-rose-500 text-white shadow-rose-200 dark:shadow-rose-900/50",
+      button:
+        "text-rose-600 group-hover:bg-rose-500 dark:text-rose-400 dark:group-hover:bg-rose-500",
+    },
+    violet: {
+      tile: "from-violet-50 to-purple-50/60 border-violet-100/80 dark:from-violet-950/40 dark:to-purple-950/40 dark:border-violet-900/60",
+      icon: "bg-violet-600 text-white shadow-violet-200 dark:shadow-violet-900/50",
+      button:
+        "text-violet-600 group-hover:bg-violet-600 dark:text-violet-400 dark:group-hover:bg-violet-600",
     },
   };
 
@@ -102,9 +130,13 @@ const AIActions = ({
           <option value="French">French</option>
           <option value="German">German</option>
           <option value="Arabic">Arabic</option>
+          <option value="American English">American English</option>
         </select>
       </div>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        className="mt-4 grid gap-3 sm:grid-cols-2 
+        grid-cols-2 lg:grid-cols-3 xl:grid-cols-3"
+      >
         {actions.map(({ icon: Icon, title, text, tone }) => {
           const t = tones[tone];
           return (
@@ -115,13 +147,18 @@ const AIActions = ({
                 (title === "Generate Summary" && loadingActions.summary) ||
                 (title === "Extract Key Points" && loadingActions.keypoints) ||
                 (title === "Extract Tasks" && loadingActions.actionitems) ||
-                (title === "Translate" && loadingActions.translate)
+                (title === "Translate" && loadingActions.translate) ||
+                (title === "Emotion Analysis" &&
+                  loadingActions.emotionanalysis) ||
+                (title === "Sentiment Analysis" && loadingActions.sentiment)
               }
               onClick={() => {
                 if (title === "Generate Summary") generateSummary();
                 if (title === "Extract Key Points") generateKeyPoints();
                 if (title === "Extract Tasks") generateActionItems();
                 if (title === "Translate") translateTranscript();
+                if (title === "Emotion Analysis") generateEmotionAnalysis();
+                if (title === "Sentiment Analysis") generateSentimentAnalysis();
               }}
               className={`group min-h-40 rounded-2xl border bg-gradient-to-br p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:text-white disabled:opacity-60 disabled:cursor-not-allowed ${t.tile}`}
             >
@@ -139,7 +176,13 @@ const AIActions = ({
                       ? "Generating..."
                       : loadingActions.translate && title === "Translate"
                         ? "Translating..."
-                        : title}
+                        : loadingActions.emotionanalysis &&
+                            title === "Emotion Analysis"
+                          ? "Analyzing..."
+                          : loadingActions.sentiment &&
+                              title === "Sentiment Analysis"
+                            ? "Analyzing..."
+                            : title}
               </h3>
               <p className="mt-1 text-[11px] leading-4 text-slate-500 dark:text-slate-400">
                 {text}

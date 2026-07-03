@@ -54,7 +54,7 @@ export default function DashboardLayout({
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             {setSearchTerm && (
-              <label className="hidden h-10 items-center gap-2.5 rounded-xl border border-slate-200/80 bg-white px-3 shadow-sm transition focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-50 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:border-indigo-600 dark:focus-within:ring-indigo-950 md:flex">
+              <label className=" h-10 items-center gap-2.5 rounded-xl border border-slate-200/80 bg-white px-3 shadow-sm transition focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-50 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:border-indigo-600 dark:focus-within:ring-indigo-950 flex">
                 <Search
                   size={16}
                   className="text-slate-400 dark:text-slate-500"

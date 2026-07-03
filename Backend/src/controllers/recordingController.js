@@ -11,6 +11,8 @@ const createRecording = async (req, res) => {
       actionItems,
       translatedText,
       audioUrl,
+      emotionAnalysis,
+      sentimentAnalysis,
     } = req.body;
     const recording = await Recording.create({
       user: req.user.id,
@@ -21,6 +23,8 @@ const createRecording = async (req, res) => {
       actionItems,
       translatedText,
       audioUrl,
+      emotionAnalysis,
+      sentimentAnalysis,
     });
 
     res.status(201).json({

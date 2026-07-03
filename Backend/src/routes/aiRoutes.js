@@ -1,18 +1,27 @@
-const express = require('express');
-const aiController = require('../controllers/aiController');
+const express = require("express");
+const aiController = require("../controllers/aiController");
 
 const router = express.Router();
 
 // POST /api/ai/summary - Generate a summary from transcript
-router.post('/ai/summary', aiController.generateSummary);
+router.post("/ai/summary", aiController.generateSummary);
 
 // POST /api/ai/keypoints - Extract key points from transcript
-router.post('/ai/keypoints', aiController.generateKeyPoints);
+router.post("/ai/keypoints", aiController.generateKeyPoints);
 
 // POST /api/ai/actionitems - Extract action items from transcript
-router.post('/ai/actionitems', aiController.generateActionItems);
+router.post("/ai/actionitems", aiController.generateActionItems);
 
 // POST /api/ai/translate - Translate transcript to target language
-router.post('/ai/translate', aiController.translateTranscript);
+router.post("/ai/translate", aiController.translateTranscript);
+
+// POST /api/ai/emotion - Analyze emotion from transcript
+router.post("/ai/emotion", aiController.analyzeEmotion);
+
+// POST /api/ai/title - Generate meeting title from transcript
+router.post("/ai/title", aiController.generateMeetingTitle);
+
+// POST /api/ai/sentiment - Analyze sentiment from transcript
+router.post("/ai/sentiment", aiController.analyzeSentiment);
 
 module.exports = router;

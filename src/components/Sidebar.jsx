@@ -16,10 +16,10 @@ import { useNavigate } from "react-router-dom";
 
 const links = [
   ["Dashboard", LayoutDashboard, "/dashboard"],
-  ["New Recording", Mic2, "/dashboard#record"],
-  ["History", History, "/dashboard#history"],
-  ["Profile", UserRound, "/dashboard#profile"],
-  ["Settings", Settings, "/dashboard#settings"],
+  ["New Recording", Mic2, "/record"],
+  ["History", History, "/history"],
+  ["Profile", UserRound, "/profile"],
+  ["Settings", Settings, "/settings"],
 ];
 
 export default function Sidebar({ open, onClose }) {

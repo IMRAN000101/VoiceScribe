@@ -116,10 +116,172 @@ ${transcript}`;
   return translation;
 }
 
+async function generateEmotionAnalysis(transcript) {
+  console.log("[EMOTION] Starting emotion analysis");
+
+  const prompt = `
+You are an expert emotion analysis engine.
+
+Analyze the following meeting transcript.
+
+Identify the overall emotions expressed throughout the conversation.
+When determining the dominant emotion, prioritize emotionally significant statements over purely informational content.
+
+If a strong emotional statement appears, reflect that appropriately in the dominant emotion and confidence score.
+
+Do not simply choose "Neutral" because most of the transcript is factual.
+
+Return ONLY valid JSON.
+
+Use exactly this format:
+
+{
+  "dominantEmotion": "Neutral",
+  "confidence": 87,
+  "reason": "Short explanation",
+  "emotions": [
+    {
+      "name": "Neutral",
+      "percentage": 87
+    },
+    {
+      "name": "Happy",
+      "percentage": 8
+    },
+    {
+      "name": "Excited",
+      "percentage": 5
+    }
+  ]
+}
+
+Rules:
+- Allowed emotions:
+Happy
+Neutral
+Sad
+Angry
+Excited
+Frustrated
+Confused
+Concerned
+Motivated
+
+- Confidence must be between 0 and 100.
+- Percentages must total exactly 100.
+- Return ONLY JSON.
+- Do not include markdown.
+- Do not include code fences.
+- Do not include explanations outside the JSON.
+
+Transcript:
+${transcript} `;
+
+  const response = await generateAIResponse(prompt);
+  console.log("[EMOTION] Emotion analysis genereated successfully");
+
+  const cleanedResponse = response
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+  return JSON.parse(cleanedResponse);
+}
+
+// Generate a meeting title from the transcript
+async function generateMeetingTitle(transcript) {
+  console.log("[TITLE] Generating meeting title");
+
+  const prompt = `
+You are an expert meeting assistant.
+
+Generate a short, professional meeting title.
+
+Rules:
+- Maximum 6 words.
+- Do not use quotation marks.
+- Do not include punctuation at the end.
+- Do not include words like "Meeting" unless they naturally fit.
+- Return ONLY the title.
+
+Examples:
+
+Sprint Planning
+
+Client Requirement Discussion
+
+Weekly Team Stand-up
+
+Technical Interview
+
+Project Deadline Review
+
+Manager Feedback Session
+
+Transcript:
+${transcript}
+`;
+
+  const title = await generateAIResponse(prompt);
+
+  console.log("[TITLE] Meeting title generated");
+
+  return title.trim();
+}
+
+//Generate Sentiment Analysis from the transcript
+async function generateSentimentAnalysis(transcript) {
+  console.log("[SENTIMENT] Starting sentiment analysis");
+
+  const prompt = `
+You are an expert sentiment analysis engine.
+
+Analyze the overall sentiment of the following meeting transcript.
+
+Return ONLY valid JSON.
+
+Use exactly this format:
+
+{
+  "sentiment": "Positive",
+  "confidence": 92,
+  "reason": "Brief explanation of why this sentiment was chosen."
+}
+
+Rules:
+- Allowed sentiments:
+Positive
+Neutral
+Negative
+
+- Confidence must be between 0 and 100.
+- Return ONLY JSON.
+- Do not use markdown.
+- Do not include code fences.
+- Do not include any explanation outside the JSON.
+
+Transcript:
+${transcript}
+`;
+
+  const response = await generateAIResponse(prompt);
+
+  const cleanedResponse = response
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+
+  console.log("[SENTIMENT] Analysis completed");
+
+  return JSON.parse(cleanedResponse);
+}
+
 module.exports = {
   generateAIResponse,
   generateSummary,
   extractKeyPoints,
   extractActionItems,
   translateTranscript,
+  generateEmotionAnalysis,
+  generateMeetingTitle,
+  generateSentimentAnalysis,
 };

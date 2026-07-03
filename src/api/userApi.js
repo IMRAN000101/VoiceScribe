@@ -8,3 +8,15 @@ export async function getProfile() {
     throw error.response?.data?.message || error.message;
   }
 }
+
+export async function changePassword(currentPassword, newPassword) {
+  try {
+    const response = await api.put("/users/change-password", {
+      currentPassword,
+      newPassword,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || error.message;
+  }
+}

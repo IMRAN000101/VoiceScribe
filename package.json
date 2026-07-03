@@ -1,1 +1,25 @@
-{"name":"voicescribe-ai","private":true,"version":"1.0.0","type":"module","scripts":{"dev":"vite --configLoader native","build":"vite build --configLoader native","preview":"vite preview"},"dependencies":{"@vitejs/plugin-react":"latest","autoprefixer":"latest","axios":"^1.18.1","lucide-react":"latest","postcss":"latest","react":"latest","react-dom":"latest","react-hot-toast":"^2.6.0","react-router-dom":"latest","tailwindcss":"3.4.17","vite":"latest"}}
+{
+  "name": "voicescribe-ai",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --configLoader native",
+    "build": "vite build --configLoader native",
+    "preview": "vite preview",
+    "lint":"eslint ."
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "autoprefixer": "latest",
+    "axios": "^1.18.1",
+    "lucide-react": "latest",
+    "postcss": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "latest",
+    "tailwindcss": "3.4.17",
+    "vite": "latest"
+  }
+}

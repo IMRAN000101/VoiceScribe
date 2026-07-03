@@ -12,8 +12,8 @@ const RecentRecordings = ({
   handleOpenRecording,
   setRecordingToDelete,
   setShowDeleteModal,
-  // sortBy,
-  // setSortBy,
+  showViewAll = true,
+  readOnly=false,
 }) => {
   return (
     <Card
@@ -29,17 +29,18 @@ const RecentRecordings = ({
             Your latest captured conversations
           </p>
         </div>
-        <button
-          disabled:opacity-50="true"
-          disabled:cursor-not-allowed="true"
-          className="group flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400"
-        >
-          View all{" "}
-          <ChevronRight
-            size={15}
-            className="transition-transform group-hover:translate-x-0.5"
-          />
-        </button>
+        {showViewAll && (
+          <button
+            onClick={() => navigate("/history")}
+            className="group flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400"
+          >
+            View all{" "}
+            <ChevronRight
+              size={15}
+              className="transition-transform group-hover:translate-x-0.5"
+            />
+          </button>
+        )}
       </div>
 
       <div className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -106,51 +107,53 @@ const RecentRecordings = ({
                 {new Date(recording.createdAt).toLocaleDateString()}
               </span>
 
-              <div className="ml-auto flex items-center gap-2">
-                {editingId === recording._id ? (
-                  <>
-                    <Button
-                      size="sm"
-                      onClick={() => handleUpdatedTitle(recording._id)}
-                    >
-                      Save
-                    </Button>
+              {!readOnly && (
+                <div className="ml-auto flex items-center gap-2">
+                  {editingId === recording._id ? (
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={() => handleUpdatedTitle(recording._id)}
+                      >
+                        Save
+                      </Button>
 
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => {
-                        setEditingId(null);
-                        setEditedTitle("");
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => {
-                        setEditingId(recording._id);
-                        setEditedTitle(recording.title);
-                      }}
-                      className="rounded-md px-3 py-1 text-sm font-medium text-indigo-400 hover:bg-indigo-500/10 transition"
-                    >
-                      Edit
-                    </button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => {
+                          setEditingId(null);
+                          setEditedTitle("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          setEditingId(recording._id);
+                          setEditedTitle(recording.title);
+                        }}
+                        className="rounded-md px-3 py-1 text-sm font-medium text-indigo-400 hover:bg-indigo-500/10 transition"
+                      >
+                        Edit
+                      </button>
 
-                    <button
-                      onClick={() => {
-                        setRecordingToDelete(recording._id);
-                        setShowDeleteModal(true);
-                      }}
-                      className="rounded-md px-3 py-1 text-sm font-medium text-red-400 hover:bg-red-500/10 transition"
-                    >
-                      Delete
-                    </button>
-                  </>
-                )}
-              </div>
+                      <button
+                        onClick={() => {
+                          setRecordingToDelete(recording._id);
+                          setShowDeleteModal(true);
+                        }}
+                        className="rounded-md px-3 py-1 text-sm font-medium text-red-400 hover:bg-red-500/10 transition"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           ))
         )}

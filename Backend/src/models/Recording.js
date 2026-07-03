@@ -39,6 +39,55 @@ const RecordingSchema = new mongoose.Schema(
     audioUrl: {
       type: String,
     },
+    emotionAnalysis: {
+      dominantEmotion: {
+        type: String,
+        enum: [
+          "Happy",
+          "Neutral",
+          "Sad",
+          "Angry",
+          "Excited",
+          "Frustrated",
+          "Confused",
+          "Concerned",
+          "Motivated",
+        ],
+        default: "Neutral",
+      },
+      confidence: {
+        type: Number,
+        defautl: 0,
+      },
+      reason: {
+        type: String,
+        defautl: "",
+      },
+      emotions: {
+        type: [
+          {
+            name: String,
+            percentage: Number,
+          },
+        ],
+        default: [],
+      },
+    },
+    sentimentAnalysis: {
+      sentiment: {
+        type: String,
+        enum: ["Positive", "Neutral", "Negative"],
+        default: "Neutral",
+      },
+      confidence: {
+        type: Number,
+        default: 0,
+      },
+      reason: {
+        type: String,
+        default: "",
+      },
+    },
   },
   {
     timestamps: true,

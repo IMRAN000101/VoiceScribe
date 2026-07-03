@@ -5,6 +5,12 @@ import DashboardPage from "./pages/DashboardPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 
+import DashboardOverviewPage from "./pages/DashboardOverview";
+import NewRecordingPage from "./pages/NewRecordingPage";
+import HistoryPage from "./pages/HistoryPage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
+
 export default function App() {
   return (
     <Routes>
@@ -29,7 +35,47 @@ export default function App() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <DashboardOverviewPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/record"
+        element={
+          <ProtectedRoute>
+            <NewRecordingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/record/:id?"
+        element={
+          <ProtectedRoute>
+            <NewRecordingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/history"
+        element={
+          <ProtectedRoute>
+            <HistoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
           </ProtectedRoute>
         }
       />
