@@ -32,8 +32,8 @@ export default function DashboardLayout({
         />
       )}
       <main className="relative pt-[76px] lg:pl-[272px]">
-        <header className="fixed inset-x-0 top-0 z-30 flex h-[76px] items-center justify-between border-b border-white/80 bg-white/75 px-4 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/75 sm:px-6 xl:px-8">
-          <div className="flex items-center gap-3">
+        <header className="fixed top-0 left-0 right-0 lg:left-[272px] z-30 flex h-[76px] items-center border-b border-white/80 bg-white/75 px-4 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/75 sm:px-6 xl:px-8">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             <button
               aria-label="Open sidebar"
               onClick={() => setOpen(true)}
@@ -54,7 +54,7 @@ export default function DashboardLayout({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="ml-4 flex shrink-0 items-center gap-2 sm:gap-3">
             {setSearchTerm && (
               <label className=" h-10 items-center gap-2.5 rounded-xl border border-slate-200/80 bg-white px-3 shadow-sm transition focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-50 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:border-indigo-600 dark:focus-within:ring-indigo-950 flex">
                 <Search
