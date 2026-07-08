@@ -12,6 +12,8 @@ import {
 import { Card } from "../ui";
 
 const AIActions = ({
+  transcript,
+  setTranscript,
   language,
   setLanguage,
   loadingActions,
@@ -143,6 +145,7 @@ const AIActions = ({
             <button
               key={title}
               disabled={
+                !transcript.trim() ||
                 (title === "Translate" && !language) ||
                 (title === "Generate Summary" && loadingActions.summary) ||
                 (title === "Extract Key Points" && loadingActions.keypoints) ||

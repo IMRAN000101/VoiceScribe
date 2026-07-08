@@ -1,5 +1,6 @@
 import { ChevronRight, Mic2, Play, Search } from "lucide-react";
 import { Button, Card } from "../ui";
+import { useNavigate } from "react-router-dom";
 
 const RecentRecordings = ({
   recordings,
@@ -15,6 +16,7 @@ const RecentRecordings = ({
   showViewAll = true,
   readOnly=false,
 }) => {
+  const navigate = useNavigate();
   return (
     <Card
       id="history"

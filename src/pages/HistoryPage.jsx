@@ -11,6 +11,7 @@ import RecentRecordings from "../components/dashboard/RecentRecordings";
 import DeleteModal from "../components/dashboard/DeleteModal";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import SkeletonCard from "../components/common/SkeletonCard";
 
 export default function HistoryPage() {
   const [recordings, setRecordings] = useState([]);
@@ -19,6 +20,7 @@ export default function HistoryPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recordingToDelete, setRecordingToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,10 +29,13 @@ export default function HistoryPage() {
 
   async function loadRecordings() {
     try {
+      setLoading(true);
       const { data } = await getRecordings();
       setRecordings(data.recordings);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   }
   async function handleOpenRecording(id) {
@@ -72,11 +77,33 @@ export default function HistoryPage() {
       recording.transcript.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
+  if (loading) {
+    return (
+      <DashboardLayout searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
+        <div className="mx-auto max-w-[1480px] space-y-6 p-4 pb-10 sm:p-6 xl:p-8">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </DashboardLayout>
+    );
+  }
+  if (!recordings.length) {
+    return (
+      <DashboardLayout searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
+        <div className="mx-auto max-w-[1480px] p-6">
+          <EmptyState
+            title="No recordings yet"
+            description="Start your first recording and VoiceScribe AI will organize it automatically."
+            buttonText="New Recording"
+            buttonLink="/record"
+          />
+        </div>
+      </DashboardLayout>
+    );
+  }
   return (
-    <DashboardLayout 
-    searchTerm={searchTerm} 
-    setSearchTerm={setSearchTerm}
-    >
+    <DashboardLayout searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
       <div className="mx-auto max-w-[1480px] space-y-7 p-4 pb-10 sm:p-6 xl:p-8">
         <div>
           <h1 className="text-3xl font-bold dark:text-white">History</h1>

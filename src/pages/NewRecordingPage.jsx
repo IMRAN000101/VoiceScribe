@@ -5,6 +5,7 @@ import {
   Menu as ListIcon,
   Check,
   Brain,
+  Smile,
 } from "lucide-react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { Button } from "../components/ui";
@@ -16,6 +17,7 @@ import RecordingCard from "../components/dashboard/RecordingCard";
 import ResultCard from "../components/dashboard/ResultCard";
 import TranscriptCard from "../components/dashboard/TranscriptCard";
 import AIActions from "../components/dashboard/AIActions";
+import AudioDropzone from "../components/dashboard/AudioDropzone";
 
 import {
   generateSummary as generateSummaryApi,
@@ -57,7 +59,7 @@ export default function NewRecordingPage() {
   const [emotionAnalysis, setEmotionAnalysis] = useState(null);
   const [sentimentAnalysis, setSentimentAnalysis] = useState(null);
   const [meetingTitle, setMeetingTitle] = useState("");
-
+  const [uploadLoading, setUploadLoading] = useState(false);
   const [loadingActions, setLoadingActions] = useState({
     summary: false,
     keypoints: false,
@@ -68,13 +70,24 @@ export default function NewRecordingPage() {
     sentiment: false,
   });
 
+  const [recordingTime, setRecordingTime] = useState(0);
+
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const timerRef = useRef(null);
 
   const { user } = useAuth();
   useEffect(() => {
     console.log(user);
   }, [user]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
 
   const { id } = useParams();
   useEffect(() => {
@@ -96,15 +109,21 @@ export default function NewRecordingPage() {
       mediaRecorder.start();
       console.log("🎤 Recording Started");
       setIsRecording(true);
+      setRecordingTime(0);
+
+      timerRef.current = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
     } catch (error) {
       console.log("Microphone access denied:", error);
     }
   }
-
   async function stopRecording() {
     const mediaRecorder = mediaRecorderRef.current;
     if (!mediaRecorder) return;
     mediaRecorder.stop();
+    clearInterval(timerRef.current);
+    timerRef.current = null;
     mediaRecorder.onstop = async () => {
       console.log("🛑 Recording stopped");
       const audioBlob = new Blob(audioChunksRef.current, {
@@ -122,6 +141,12 @@ export default function NewRecordingPage() {
           body: formData,
         });
         const data = await response.json();
+        const transcript = data.transcript?.trim() || "";
+        if (!transcript) {
+          toast.error("No speech detected. Please try recording again.");
+          setTranscript("");
+          return;
+        }
         console.log("Backend Response:", data);
         setTranscript(data.transcript);
       } catch (error) {
@@ -129,6 +154,36 @@ export default function NewRecordingPage() {
       }
     };
     setIsRecording(false);
+  }
+  async function handleAudioUpload(file) {
+    try {
+      setUploadLoading(true);
+
+      const formData = new FormData();
+      formData.append("audio", file);
+
+      const response = await fetch("http://localhost:5000/api/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      console.log(data);
+      console.log(data.transcript);
+      console.log(data.transcript?.length);
+      const transcript = data.transcript?.trim() || "";
+      console.log("Final transcript:", transcript);
+      if (!transcript) {
+        toast.error("No speech detected");
+        return;
+      }
+      setTranscript(transcript);
+      toast.success("Transcript generated");
+    } catch (error) {
+      console.error(error);
+      toast.error("Transcription failed");
+    } finally {
+      setUploadLoading(false);
+    }
   }
 
   async function generateSummary() {
@@ -257,10 +312,10 @@ export default function NewRecordingPage() {
       if (!finalTitle) {
         const { data } = await generateMeetingTitleApi(transcript);
         finalTitle = data.result;
+        setMeetingTitle(finalTitle);
       }
       const recordingData = {
-        title:
-          editedTitle || finalTitle || `Meeting ${new Date().toLocaleString()}`,
+        title: finalTitle || `Meeting ${new Date().toLocaleString()}`,
         transcript,
         summary,
         keyPoints: keyPoints
@@ -275,6 +330,7 @@ export default function NewRecordingPage() {
         emotionAnalysis,
         sentimentAnalysis,
       };
+      if (!transcript.trim()) return toast.error("Nothing to save");
       const { data } = await saveRecording(recordingData);
       console.log(data);
       toast.success("Recording Saved");
@@ -287,7 +343,6 @@ export default function NewRecordingPage() {
       setMeetingTitle("");
       setAudioURL(null);
       setSentimentAnalysis(null);
-      await loadRecordings();
     } catch (error) {
       console.error(error);
       toast.error("Failed to Save Recording");
@@ -357,6 +412,9 @@ ${emotion.emotions.map((e) => `${e.name}: ${e.percentage}%`).join("\n")}
             startRecording={startRecording}
             stopRecording={stopRecording}
             audioURL={audioURL}
+            recordingTime={recordingTime}
+            uploadLoading={uploadLoading}
+            onFileSelect={handleAudioUpload}
           />
 
           <div className="space-y-6">
@@ -366,6 +424,8 @@ ${emotion.emotions.map((e) => `${e.name}: ${e.percentage}%`).join("\n")}
             />
 
             <AIActions
+              transcript={transcript}
+              setTranscript={setTranscript}
               language={language}
               setLanguage={setLanguage}
               loadingActions={loadingActions}
@@ -513,7 +573,7 @@ ${emotion.emotions.map((e) => `${e.name}: ${e.percentage}%`).join("\n")}
             )}
           </ResultCard>
           <ResultCard
-            icon={Brain}
+            icon={Smile}
             title="Sentiment Analysis"
             label="Generated By AI"
             color="blue"
@@ -552,7 +612,9 @@ ${emotion.emotions.map((e) => `${e.name}: ${e.percentage}%`).join("\n")}
         </section>
 
         <div className="flex justify-end">
-          <Button onClick={handleSaveRecording}>Save Recording</Button>
+          <Button disabled={!transcript.trim()} onClick={handleSaveRecording}>
+            Save Recording
+          </Button>
         </div>
       </div>
     </DashboardLayout>

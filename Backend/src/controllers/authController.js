@@ -96,7 +96,7 @@ async function login(req, res) {
         email: user.email,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" },
+      { expiresIn: "4d" },
     );
     return res.status(200).json({
       success: true,

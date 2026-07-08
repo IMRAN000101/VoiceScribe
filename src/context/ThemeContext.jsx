@@ -1,40 +1,35 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext();
+const STORAGE_KEY = "voicescribe-theme";
+
+function getInitialTheme() {
+  if (typeof window === "undefined") return "light";
+
+  const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("theme");
+  if (stored === "light" || stored === "dark") return stored;
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function applyTheme(newTheme) {
+  const html = document.documentElement;
+  html.classList.toggle("dark", newTheme === "dark");
+  html.style.colorScheme = newTheme;
+}
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('dark');
-  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState(getInitialTheme);
 
   useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem('theme');
-
-    if (stored) {
-      setTheme(stored);
-      applyTheme(stored);
-    } else {
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const defaultTheme = isDark ? 'dark' : 'light';
-      setTheme(defaultTheme);
-      applyTheme(defaultTheme);
-    }
-  }, []);
-
-  const applyTheme = (newTheme) => {
-    const html = document.documentElement;
-    if (newTheme === 'dark') {
-      html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-    }
-  };
+    applyTheme(theme);
+    localStorage.setItem(STORAGE_KEY, theme);
+  }, [theme]);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    applyTheme(newTheme);
+    setTheme((currentTheme) => (currentTheme === "light" ? "dark" : "light"));
   };
 
   return (

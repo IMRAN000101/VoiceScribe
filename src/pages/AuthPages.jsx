@@ -1,9 +1,10 @@
 import { login as loginUser, signup as signupUser } from "../api/authApi";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, Lock, UserRound } from "lucide-react";
+import { ArrowLeft, Mail, Lock, UserRound, Eye, EyeOff } from "lucide-react";
 import { Logo, Button, Card } from "../components/ui";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 function Field({
   label,
@@ -13,6 +14,8 @@ function Field({
   name,
   value,
   onChange,
+  showPassword,
+  setShowPassword,
 }) {
   return (
     <label className="block">
@@ -22,13 +25,24 @@ function Field({
       <span className="flex items-center gap-3 rounded-xl border bg-white px-3.5 py-3 focus-within:border-indigo-400 focus-within:ring-4 focus-within:ring-indigo-50 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:border-indigo-600 dark:focus-within:ring-indigo-950">
         <Icon size={18} className="text-slate-400 dark:text-slate-500" />
         <input
-          type={type}
+          type={
+            type === "password" ? (showPassword ? "text" : "password") : type
+          }
           placeholder={placeholder}
           name={name}
           value={value}
           onChange={onChange}
           className="w-full bg-transparent text-sm outline-none dark:text-white dark:placeholder-slate-500"
         />
+        {type === "password" && (
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-white"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        )}
       </span>
     </label>
   );
@@ -43,6 +57,9 @@ function Auth({ signup = false }) {
   });
   const { loadUser } = useAuth();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -53,6 +70,9 @@ function Auth({ signup = false }) {
     e.preventDefault();
     try {
       if (signup) {
+        if (signup && formData.password !== formData.confirmPassword) {
+          return toast.error("Passwords do not match");
+        }
         await signupUser(formData);
         navigate("/login");
       } else {
@@ -63,6 +83,7 @@ function Auth({ signup = false }) {
       }
     } catch (error) {
       console.error(error);
+      toast.error(error.response?.data?.message || "Invalid email or password");
     }
   };
   return (
@@ -91,7 +112,7 @@ function Auth({ signup = false }) {
       <main className="relative flex items-center justify-center bg-slate-50 px-5 py-12 dark:bg-slate-900">
         <Link
           to="/"
-          className="absolute left-6 top-6 flex items-center gap-2 text-sm text-slate-500 hover:text-brand dark:text-slate-400 dark:hover:text-indigo-400"
+          className="absolute left-6 top-6 flex items-center gap-2 text-sm text-slate-500 hover:text-brand dark:text-slate-400 dark:hover:text-indigo-400 transition-all duration-100"
         >
           <ArrowLeft size={16} /> Back home
         </Link>
@@ -129,18 +150,24 @@ function Auth({ signup = false }) {
               />
               <Field
                 label="Password"
+                type="password"
                 name="password"
                 icon={Lock}
-                placeholder="••••••••"
+                placeholder="********"
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
                 value={formData.password}
                 onChange={handleChange}
               />
               {signup && (
                 <Field
                   label="Confirm Password"
+                  type="password"
                   name="confirmPassword"
                   icon={Lock}
-                  placeholder="••••••••"
+                  placeholder="********"
+                  showPassword={showConfirmPassword}
+                  setShowPassword={setShowConfirmPassword}
                   value={formData.confirmPassword}
                   onChange={handleChange}
                 />

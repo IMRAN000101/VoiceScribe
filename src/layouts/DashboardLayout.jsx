@@ -3,6 +3,7 @@ import { Menu, Search, Bell, ChevronDown, Command } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import ThemeToggle from "../components/ThemeToggle";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function DashboardLayout({
   children,
@@ -11,6 +12,7 @@ export default function DashboardLayout({
 }) {
   const [open, setOpen] = useState(false);
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -75,7 +77,10 @@ export default function DashboardLayout({
               <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-indigo-500 ring-2 ring-white dark:ring-slate-900" />
             </button>
             <ThemeToggle />
-            <button className="flex items-center gap-2 rounded-xl p-1.5 pr-2 hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm">
+            <button
+              onClick={() => navigate("/profile")}
+              className="flex items-center gap-2 rounded-xl p-1.5 pr-2 hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm"
+            >
               <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-xs font-bold text-white shadow-md shadow-indigo-200 dark:shadow-indigo-900/30">
                 {user?.name
                   ?.split(" ")
@@ -84,9 +89,6 @@ export default function DashboardLayout({
               </span>
               <span className="hidden text-left xl:block">
                 <b className="block text-xs dark:text-white">{user?.name}</b>
-                <small className="block text-[10px] text-slate-400 dark:text-slate-500">
-                  Free plan
-                </small>
               </span>
               <ChevronDown
                 size={13}
