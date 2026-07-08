@@ -123,10 +123,13 @@ export default function DashboardPage() {
       const formData = new FormData();
       formData.append("audio", audioBlob, "recording.webm");
       try {
-        const response = await fetch("http://localhost:5000/api/transcribe", {
-          method: "POST",
-          body: formData,
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/transcribe`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
         const data = await response.json();
         console.log("Backend Response:", data);
         setTranscript(data.transcript);

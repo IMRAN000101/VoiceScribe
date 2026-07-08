@@ -7,12 +7,14 @@
     "dev": "vite --configLoader native",
     "build": "vite build --configLoader native",
     "preview": "vite preview",
-    "lint":"eslint ."
+    "lint": "eslint ."
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
     "autoprefixer": "latest",
     "axios": "^1.18.1",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
     "lucide-react": "latest",
     "postcss": "latest",
     "react": "latest",
