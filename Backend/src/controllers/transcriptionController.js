@@ -1,5 +1,6 @@
 const { transcribeAudio } = require("../services/whisperService");
 const { deleteFile } = require("../utils/deleteFile");
+const path = require("path");
 
 async function transcribe(req, res) {
   try {
@@ -13,7 +14,8 @@ async function transcribe(req, res) {
 
     console.log("[UPLOAD] Processing file: " + req.file.filename);
 
-    let transcript = await transcribeAudio(req.file.path);
+    const absolutePath = path.resolve(req.file.path);
+    let transcript = await transcribeAudio(absolutePath);
     
     if (transcript && transcript.trim().length < 4) {
       transcript = "";

@@ -1,12 +1,24 @@
 const multer = require("multer");
+const fs = require("path");
 const path = require("path");
 
-const ALLOWED_MIME_TYPES = ["audio/webm", "audio/wav", "audio/mpeg", "audio/mp3"];
+const ALLOWED_MIME_TYPES = [
+  "audio/webm",
+  "audio/wav",
+  "audio/mpeg",
+  "audio/mp3",
+];
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
+
+const uploadDir = path.join(__dirname, "../../uploads");
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/");
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const timestamp = Date.now();
