@@ -1,5 +1,5 @@
+const fs = require("fs");
 const multer = require("multer");
-const fs = require("path");
 const path = require("path");
 
 const ALLOWED_MIME_TYPES = [
