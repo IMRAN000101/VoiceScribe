@@ -31,8 +31,8 @@ export default function DashboardLayout({
           onClick={() => setOpen(false)}
         />
       )}
-      <main className="relative lg:pl-[272px]">
-        <header className="sticky top-0 z-30 flex h-[76px] items-center justify-between border-b border-white/80 bg-white/75 px-4 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/75 sm:px-6 xl:px-8">
+      <main className="relative pt-[76px] lg:pl-[272px]">
+        <header className="fixed inset-x-0 top-0 z-30 flex h-[76px] items-center justify-between border-b border-white/80 bg-white/75 px-4 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/75 sm:px-6 xl:px-8">
           <div className="flex items-center gap-3">
             <button
               aria-label="Open sidebar"

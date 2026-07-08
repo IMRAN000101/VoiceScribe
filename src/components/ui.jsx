@@ -5,20 +5,22 @@ export function Logo({ light = false }) {
   const navigate = useNavigate();
   return (
     <div className="animate-fadeIn">
-    <div
-      onClick={() => {
-        navigate("/");
-      }}
-      className="flex items-center gap-2.5 font-bold text-lg hover:cursor-pointer"
-    >
-      <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50">
-        <Mic2 size={19} />
-      </span>
+      <div
+        onClick={() => {
+          navigate("/");
+        }}
+        className="flex items-center gap-2.5 font-bold text-lg hover:cursor-pointer"
+      >
+        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-200/40 dark:shadow-indigo-900/20">
+          <Mic2 size={19} />
+        </span>
 
-      <span className={light ? "text-white" : "text-slate-900 dark:text-white"}>
-        VoiceScribe <b className="text-brand">AI</b>
-      </span>
-    </div>
+        <span
+          className={light ? "text-white" : "text-slate-900 dark:text-white"}
+        >
+          VoiceScribe <b className="text-brand">AI</b>
+        </span>
+      </div>
     </div>
   );
 }
@@ -30,7 +32,7 @@ export function Button({
 }) {
   const styles = {
     primary:
-      "bg-brand text-white shadow-lg shadow-indigo-200 hover:bg-indigo-600 hover:-translate-y-0.5 dark:shadow-indigo-900/50 dark:hover:shadow-indigo-900/70",
+      "bg-brand text-white shadow-md shadow-indigo-200/40 hover:bg-indigo-600 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-300/30 dark:shadow-indigo-900/20 dark:hover:shadow-indigo-900/40",
     secondary:
       "bg-white text-slate-800 border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:hover:border-indigo-600 dark:hover:bg-slate-700",
     ghost:

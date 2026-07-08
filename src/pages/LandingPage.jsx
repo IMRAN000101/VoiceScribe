@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { Button, Card, Logo } from "../components/ui";
 import { features } from "../data/mockData";
+
 export default function LandingPage() {
   const tones = {
     indigo: {
@@ -105,13 +106,17 @@ export default function LandingPage() {
                 return (
                   <Card
                     key={title}
-                    className="group p-6 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
+                    className={`group rounded-2xl border bg-gradient-to-br p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${theme.tile}`}
                   >
-                    <div className="grid h-11 w-11 place-items-center rounded-xl bg-indigo-50 text-brand group-hover:bg-brand group-hover:text-white dark:bg-indigo-950/40 dark:group-hover:bg-brand">
-                      <Icon size={21} />
-                    </div>
-                    <h3 className="mt-5 font-bold dark:text-white">{title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                    <span
+                      className={`grid h-10 w-10 place-items-center rounded-xl shadow-lg ${theme.icon}`}
+                    >
+                      <Icon size={18} />
+                    </span>
+                    <h3 className="mt-5 text-xl font-bold text-slate-900 dark:text-white">
+                      {title}
+                    </h3>
+                    <p className="mt-3 text-base leading-7 text-slate-600 dark:text-slate-400">
                       {text}
                     </p>
                   </Card>
